@@ -24,7 +24,7 @@ return array(
             'action' => array(
                 'action' => 'nosTabs',
                 'tab' => array(
-                    'url' => 'admin/noviusos_user/appdesk',
+                    'url' => 'admin/nos/appdesk?model=Nos\User\Model_User',
                     'iconUrl' => 'static/apps/noviusos_user/img/32/user.png',
                 ),
             ),

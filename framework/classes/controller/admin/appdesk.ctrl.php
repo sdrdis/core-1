@@ -27,6 +27,9 @@ class Controller_Admin_Appdesk extends Controller_Admin_Application
 {
     protected $dictionary = null;
 
+    protected $model = null;
+    protected $application = null;
+
     public function before()
     {
         parent::before();
@@ -35,8 +38,18 @@ class Controller_Admin_Appdesk extends Controller_Admin_Application
 
     public function load_config()
     {
-        list($application, $file_name) = \Config::configFile(get_called_class());
-        $this->config = \Config::mergeWithUser($application.'::'.$file_name, static::process_config($application, $this->config));
+        $this->model = \Input::get('model');
+        if (empty($this->model)) {
+            list($this->application, $file_name) = \Config::configFile(get_called_class());
+        } else {
+            list($this->application, $file_name) = \Config::configFile($this->model);
+            $last_ds = strrpos($file_name, DS);
+            $file_name = substr($file_name, 0, $last_ds - 5).'controller'.DS.'admin'.DS.'appdesk'; //.substr($file_name, $last_ds)
+            $this->config = \Config::loadConfiguration($this->application, $file_name);
+            \Arr::set($this->config, 'appdesk.appdesk.grid.urlJson', 'admin/nos/appdesk/json?model='.$this->model);
+        }
+
+        $this->config = \Config::mergeWithUser($this->application.'::'.$file_name, static::process_config($this->application, $this->config));
 
         return $this->config;
     }
@@ -86,8 +99,7 @@ class Controller_Admin_Appdesk extends Controller_Admin_Application
 
         $view->set('appdesk', \Format::forge($params)->to_json(), false);
 
-        list($application) = \Config::configFile(get_called_class());
-        $view->set('application', $application);
+        $view->set('application', $this->application);
 
         $view->set('model', isset($this->config['model']) ? $this->config['model'] : null);
 
